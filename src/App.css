@@ -1,0 +1,105 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  padding-left: 30px;
+  padding-top: 30px;
+}
+
+#Game-table {
+  width: 100%;
+  height: 100%;
+}
+
+#upperDiv {
+  height: 50%;
+  width: 100%;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+#upperDivLeft {
+  width: 40%;
+}
+
+#upperDivRight {
+  width: 60%;
+}
+
+#upperDivLeft,
+#upperDivRight {
+  height: 100%;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
+#foundation {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
+#stocks,
+#waste,
+.foundationPiles,
+.tableauPiles {
+  width: 140px;
+  height: 200px;
+  border: 1px solid gray;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
+#bottomDiv {
+  height: 50%;
+  width: 100%;
+}
+
+.symbol {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+#tableau {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.Draggable-divs {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background-color: burlywood;
+}
