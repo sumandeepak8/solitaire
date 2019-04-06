@@ -6,6 +6,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  background-color: green;
 }
 
 #root {
@@ -25,7 +26,6 @@ body {
 #upperDiv {
   height: 50%;
   width: 100%;
-
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -42,10 +42,9 @@ body {
 #upperDivLeft,
 #upperDivRight {
   height: 100%;
-
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: space-evenly;
   align-items: center;
 }
 
@@ -58,10 +57,30 @@ body {
   align-items: center;
 }
 
+#total {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.club,
+.heart,
+.spade,
+.diamond {
+  width: 100px;
+  height: 100px;
+}
+
 #stocks,
 #waste,
 .foundationPiles,
-.tableauPiles {
+.tableauPiles,
+.heartCards,
+.spadeCards,
+.clubCards,
+.diamondCards,
+#totalCards {
   width: 140px;
   height: 200px;
   border: 1px solid gray;
@@ -69,6 +88,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  background-color: brown;
 }
 
 .upperPartOfCard,
@@ -123,4 +143,14 @@ body {
   align-items: center;
 
   background-color: burlywood;
+}
+
+.heartCards,
+.diamondCards {
+  color: red;
+}
+
+.spadeCards,
+.clubCards {
+  color: black;
 }
