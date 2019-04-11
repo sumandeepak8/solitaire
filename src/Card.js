@@ -1,24 +1,36 @@
 import React, { Component } from 'react';
-import Draggable from 'react-draggable';
 
 export default class Card extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      number: props.number,
+      rank: props.rank,
       symbol: props.symbol,
-      className: props.className
+      className: props.className,
+      onDragStart: props.drag
     };
+    this.drag = this.drag.bind(this);
   }
+
+  drag(event) {
+    event.dataTransfer.setData('text', event.target.id);
+  }
+
   render() {
+    let className = this.state.className;
+    let rank = this.state.rank;
+    let id = `${rank} ${className}`;
     return (
-      <Draggable handle="div">
-        <div className={this.state.className}>
-          <div className="upperPartOfCard">{this.state.number}</div>
-          <div className="symbol">{this.state.symbol}</div>
-          <div className="lowerPartOfCard">{this.state.number}</div>
-        </div>
-      </Draggable>
+      <div
+        className={className}
+        draggable={true}
+        onDragStart={this.drag}
+        id={id}
+      >
+        <div className="upperPartOfCard">{rank}</div>
+        <div className="symbol">{this.state.symbol}</div>
+        <div className="lowerPartOfCard">{rank}</div>
+      </div>
     );
   }
 }

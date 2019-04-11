@@ -11,13 +11,33 @@ class App extends Component {
       club: props.club,
       diamond: props.diamond
     };
+    this.allowDrop = this.allowDrop.bind(this);
+    this.drop = this.drop.bind(this);
+  }
+
+  allowDrop(event) {
+    event.preventDefault();
+  }
+
+  drop(event) {
+    event.preventDefault();
+    const id = event.dataTransfer.getData('text');
+    let length = event.target.parentNode.id.split(' ').length;
+    let elementToPlace = document.getElementById(id);
+    if (length != 2) event.target.appendChild(elementToPlace);
+    else event.target.parentNode.parentNode.appendChild(elementToPlace);
   }
 
   createFoundation() {
     let pile = <div className="foundationPiles" />;
     let piles = new Array(4).fill(pile);
     return (
-      <div id="foundation" className="foundation">
+      <div
+        id="foundation"
+        className="foundation"
+        onDragOver={this.allowDrop}
+        onDrop={this.drop}
+      >
         {piles}
       </div>
     );
@@ -38,12 +58,12 @@ class App extends Component {
     let suit = new Array();
     let symbol = this.getSymbol(className);
 
-    let king = <Card symbol={symbol} number="K" className={className} />;
-    let queen = <Card symbol={symbol} number="Q" className={className} />;
-    let jack = <Card symbol={symbol} number="J" className={className} />;
+    let king = <Card symbol={symbol} rank="K" className={className} />;
+    let queen = <Card symbol={symbol} rank="Q" className={className} />;
+    let jack = <Card symbol={symbol} rank="J" className={className} />;
 
     for (let i = 1; i <= 10; i++)
-      suit.push(<Card symbol={symbol} number={i} className={className} />);
+      suit.push(<Card symbol={symbol} rank={i} className={className} />);
 
     suit.push(jack);
     suit.push(queen);
@@ -56,55 +76,46 @@ class App extends Component {
     let heart = this.getSuit('heart');
     let club = this.getSuit('club');
     let diamond = this.getSuit('diamond');
-
-    let deck = spade
+    return spade
       .concat(heart)
       .concat(club)
       .concat(diamond);
-    return deck.slice(0, 52);
   }
 
-  createStocks = function(deck) {
-    let cards = [];
+  getStockAndTableauCards = function(deck) {
+    let stockCards = [];
     for (let i = 1; i <= 24; i++) {
       let index = [Math.floor(Math.random() * deck.length)];
-      cards.push(deck[index]);
+      stockCards.push(deck[index]);
       deck.splice(index, 1);
     }
-    let stocks = (
-      <div id="stocks" className="stocks">
-        {cards}
-      </div>
-    );
-    return { stocks, deck };
+    return { stockCards, deck };
   };
 
-  getUpperLeftDiv(stocks) {
-    let waste = <div id="waste" className="waste" />;
+  getUpperLeftDiv(stockCards) {
     return (
       <div id="upperDivLeft" className="upperDivLeft">
-        {stocks}
-        {waste}
+        <div id="stocks" className="stocks">
+          {stockCards}
+        </div>
+        <div id="waste" className="waste" />;
       </div>
     );
   }
 
   getUpperRightDiv() {
-    let foundation = this.createFoundation();
     return (
       <div id="upperDivRight" className="upperDivRight">
-        {foundation}
+        {this.createFoundation()}
       </div>
     );
   }
 
   getUpperDiv(stocks) {
-    let upperDivLeft = this.getUpperLeftDiv(stocks);
-    let upperDivRight = this.getUpperRightDiv();
     return (
       <div id="upperDiv" className="upperDiv">
-        {upperDivLeft}
-        {upperDivRight}
+        {this.getUpperLeftDiv(stocks)}
+        {this.getUpperRightDiv()}
       </div>
     );
   }
@@ -119,7 +130,15 @@ class App extends Component {
         cardsForEachPile.push(cardToAdd);
         deck.splice(randomIndex, 1);
       }
-      let tablePile = <div className="tableauPiles">{cardsForEachPile}</div>;
+      let tablePile = (
+        <div
+          className="tableauPiles"
+          onDrop={this.drop}
+          onDragOver={this.allowDrop}
+        >
+          {cardsForEachPile}
+        </div>
+      );
       tableauPiles.push(tablePile);
     }
     return tableauPiles;
@@ -137,8 +156,8 @@ class App extends Component {
 
   getBoard() {
     let totalDeck = this.getDeck();
-    let { stocks, deck } = this.createStocks(totalDeck);
-    let upperDiv = this.getUpperDiv(stocks);
+    let { stockCards, deck } = this.getStockAndTableauCards(totalDeck);
+    let upperDiv = this.getUpperDiv(stockCards);
     let tableauPiles = this.getTableauPiles(deck);
     let bottomDiv = this.getBottomDiv(tableauPiles);
     return { upperDiv, bottomDiv };
