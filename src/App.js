@@ -13,17 +13,55 @@ class App extends Component {
     };
     this.allowDrop = this.allowDrop.bind(this);
     this.drop = this.drop.bind(this);
+    this.dropOnWaste = this.dropOnWaste.bind(this);
   }
 
   allowDrop(event) {
     event.preventDefault();
   }
 
+  isValidToDrop(droppableCardId, targetElementId) {
+    let cardDetails = droppableCardId.split(' ');
+    let cardRank = cardDetails[0];
+    let cardColor = cardDetails[1];
+
+    let targetDetails = targetElementId.split(' ');
+    let targetRank = targetDetails[0];
+    let targetColor = targetDetails[1];
+
+    let isDifferentColors = cardColor != targetColor;
+
+    if (
+      (targetRank == 'tableau' && cardRank == 'K') ||
+      (targetRank == 'K' && cardRank == 'Q') ||
+      (targetRank == 'Q' && cardRank == 'J') ||
+      (targetRank == 'J' && cardRank == '10')
+    )
+      return isDifferentColors;
+
+    return isDifferentColors && cardRank == targetRank - 1;
+  }
+
+  PutOnWaste(event) {
+    event.preventDefault();
+    const droppableCardId = event.dataTransfer.getData('text');
+    event.target.appendChild(document.getElementById(droppableCardId));
+  }
+
+  dropOnWaste(event) {
+    event.preventDefault();
+    const droppableCardId = event.dataTransfer.getData('text');
+    event.target.appendChild(document.getElementById(droppableCardId));
+  }
+
   drop(event) {
     event.preventDefault();
-    const id = event.dataTransfer.getData('text');
-    let length = event.target.parentNode.id.split(' ').length;
-    let elementToPlace = document.getElementById(id);
+    const droppableCardId = event.dataTransfer.getData('text');
+    let targetElementId = event.target.parentNode.id;
+    if (!this.isValidToDrop(droppableCardId, targetElementId)) return;
+
+    let elementToPlace = document.getElementById(droppableCardId);
+    let length = targetElementId.split(' ').length;
     if (length != 2) event.target.appendChild(elementToPlace);
     else event.target.parentNode.parentNode.appendChild(elementToPlace);
   }
@@ -43,27 +81,36 @@ class App extends Component {
     );
   }
 
-  getSymbol(className) {
-    let symbols = {
-      spade: this.state.spade,
-      heart: this.state.heart,
-      club: this.state.club,
-      diamond: this.state.diamond
+  getSymbolAndColor(className) {
+    const symbolAndColors = {
+      spade: { symbol: this.state.spade, color: 'black' },
+      heart: { symbol: this.state.heart, color: 'red' },
+      club: { symbol: this.state.club, color: 'black' },
+      diamond: { symbol: this.state.diamond, color: 'red' }
     };
 
-    return symbols[className];
+    let symbolAndColor = symbolAndColors[className];
+    return { symbol: symbolAndColor.symbol, color: symbolAndColor.color };
   }
 
   getSuit(className) {
     let suit = new Array();
-    let symbol = this.getSymbol(className);
+    let { symbol, color } = this.getSymbolAndColor(className);
 
-    let king = <Card symbol={symbol} rank="K" className={className} />;
-    let queen = <Card symbol={symbol} rank="Q" className={className} />;
-    let jack = <Card symbol={symbol} rank="J" className={className} />;
+    let king = (
+      <Card symbol={symbol} color={color} rank="K" className={className} />
+    );
+    let queen = (
+      <Card symbol={symbol} color={color} rank="Q" className={className} />
+    );
+    let jack = (
+      <Card symbol={symbol} color={color} rank="J" className={className} />
+    );
 
     for (let i = 1; i <= 10; i++)
-      suit.push(<Card symbol={symbol} rank={i} className={className} />);
+      suit.push(
+        <Card symbol={symbol} color={color} rank={i} className={className} />
+      );
 
     suit.push(jack);
     suit.push(queen);
@@ -98,7 +145,13 @@ class App extends Component {
         <div id="stocks" className="stocks">
           {stockCards}
         </div>
-        <div id="waste" className="waste" />;
+        <div
+          id="waste"
+          className="waste"
+          onDrop={this.dropOnWaste}
+          onDragOver={this.allowDrop}
+        />
+        ;
       </div>
     );
   }

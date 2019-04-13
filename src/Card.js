@@ -7,6 +7,7 @@ export default class Card extends Component {
       rank: props.rank,
       symbol: props.symbol,
       className: props.className,
+      color: props.color,
       onDragStart: props.drag
     };
     this.drag = this.drag.bind(this);
@@ -19,7 +20,8 @@ export default class Card extends Component {
   render() {
     let className = this.state.className;
     let rank = this.state.rank;
-    let id = `${rank} ${className}`;
+    let color = this.state.color;
+    let id = `${rank} ${color} ${className}`;
     return (
       <div
         className={className}
