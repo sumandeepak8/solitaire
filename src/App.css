@@ -59,7 +59,11 @@ body {
 .waste .club,
 .waste .heart,
 .waste .spade,
-.waste .diamond {
+.waste .diamond,
+.foundationPiles .club,
+.foundationPiles .heart,
+.foundationPiles .spade,
+.foundationPiles .diamond {
   width: 100px;
   height: 130px;
   font-size: 35px;

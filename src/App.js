@@ -16,6 +16,7 @@ class App extends Component {
     this.dropOnWaste = this.dropOnWaste.bind(this);
     this.PutOnWaste = this.PutOnWaste.bind(this);
     this.putBackOnStocks = this.putBackOnStocks.bind(this);
+    this.dropOnFoundationPiles = this.dropOnFoundationPiles.bind(this);
   }
 
   putBackOnStocks(event) {
@@ -71,12 +72,32 @@ class App extends Component {
     const droppableCardId = event.dataTransfer.getData('text');
     let targetElementId = event.target.parentNode.id;
     if (!this.isValidToDrop(droppableCardId, targetElementId)) return;
-
     let elementToPlace = document.getElementById(droppableCardId);
     let length = targetElementId.split(' ').length;
-
     if (length != 3) event.target.appendChild(elementToPlace);
     else event.target.parentNode.parentNode.appendChild(elementToPlace);
+  }
+
+  isValidToDropOnFoundationPile(event, droppableCardId) {
+    let cardDetails = droppableCardId.split(' ');
+    let cardRank = cardDetails[0];
+    let cardSuit = cardDetails[2];
+    let upperCard = event.target.lastChild;
+    let targetDetails = [];
+    if (upperCard != null) {
+      targetDetails = upperCard.id.split(' ');
+    }
+    let targetRank = targetDetails[0];
+    let targetSuit = targetDetails[2];
+    if (upperCard == null && cardRank == 1) return true;
+    if (cardSuit == targetSuit && cardRank - 1 == targetRank) return true;
+    return false;
+  }
+
+  dropOnFoundationPiles(event) {
+    const droppableCardId = event.dataTransfer.getData('text');
+    if (!this.isValidToDropOnFoundationPile(event, droppableCardId)) return;
+    event.target.appendChild(document.getElementById(droppableCardId));
   }
 
   createFoundation() {
@@ -87,7 +108,7 @@ class App extends Component {
         id="foundation"
         className="foundation"
         onDragOver={this.allowDrop}
-        onDrop={this.drop}
+        onDrop={this.dropOnFoundationPiles}
       >
         {piles}
       </div>
@@ -152,15 +173,27 @@ class App extends Component {
     return { stockCards, deck };
   };
 
+  getStocksDiv(stockCards) {
+    return (
+      <div id="stocks" className="stocks" onClick={this.PutOnWaste}>
+        {stockCards}
+      </div>
+    );
+  }
+
+  getUndoDiv() {
+    return (
+      <div class="undo" onClick={this.putBackOnStocks}>
+        &#x2940;
+      </div>
+    );
+  }
+
   getUpperLeftDiv(stockCards) {
     return (
       <div id="upperDivLeft" className="upperDivLeft">
-        <div id="stocks" className="stocks" onClick={this.PutOnWaste}>
-          {stockCards}
-        </div>
-        <div class="undo" onClick={this.putBackOnStocks}>
-          &#x2940;
-        </div>
+        {this.getStocksDiv(stockCards)}
+        {this.getUndoDiv()}
         <div
           id="waste"
           className="waste"
@@ -189,6 +222,18 @@ class App extends Component {
     );
   }
 
+  getTablePile(cardsForEachPile) {
+    return (
+      <div
+        className="tableauPiles"
+        onDrop={this.drop}
+        onDragOver={this.allowDrop}
+      >
+        {cardsForEachPile}
+      </div>
+    );
+  }
+
   getTableauPiles(deck) {
     let tableauPiles = new Array();
     for (let i = 1; i <= 7; i++) {
@@ -199,15 +244,7 @@ class App extends Component {
         cardsForEachPile.push(cardToAdd);
         deck.splice(randomIndex, 1);
       }
-      let tablePile = (
-        <div
-          className="tableauPiles"
-          onDrop={this.drop}
-          onDragOver={this.allowDrop}
-        >
-          {cardsForEachPile}
-        </div>
-      );
+      let tablePile = this.getTablePile(cardsForEachPile);
       tableauPiles.push(tablePile);
     }
     return tableauPiles;
