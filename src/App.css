@@ -55,7 +55,11 @@ body {
 .stocks .club,
 .stocks .heart,
 .stocks .spade,
-.stocks .diamond {
+.stocks .diamond,
+.waste .club,
+.waste .heart,
+.waste .spade,
+.waste .diamond {
   width: 100px;
   height: 130px;
   font-size: 35px;
@@ -142,4 +146,8 @@ body {
 .spade,
 .club {
   color: black;
+}
+
+.undo {
+  font-size: 65px;
 }

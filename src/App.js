@@ -14,6 +14,24 @@ class App extends Component {
     this.allowDrop = this.allowDrop.bind(this);
     this.drop = this.drop.bind(this);
     this.dropOnWaste = this.dropOnWaste.bind(this);
+    this.PutOnWaste = this.PutOnWaste.bind(this);
+    this.putBackOnStocks = this.putBackOnStocks.bind(this);
+  }
+
+  putBackOnStocks(event) {
+    event.preventDefault();
+    let upperCard = document.getElementById('waste').lastChild;
+    if (upperCard != null) {
+      document.getElementById('stocks').appendChild(upperCard);
+    }
+  }
+
+  PutOnWaste(event) {
+    event.preventDefault();
+    let length = event.target.parentNode.id.split(' ').length;
+    if (length == 3) {
+      document.getElementById('waste').appendChild(event.target.parentNode);
+    }
   }
 
   allowDrop(event) {
@@ -42,12 +60,6 @@ class App extends Component {
     return isDifferentColors && cardRank == targetRank - 1;
   }
 
-  PutOnWaste(event) {
-    event.preventDefault();
-    const droppableCardId = event.dataTransfer.getData('text');
-    event.target.appendChild(document.getElementById(droppableCardId));
-  }
-
   dropOnWaste(event) {
     event.preventDefault();
     const droppableCardId = event.dataTransfer.getData('text');
@@ -62,7 +74,8 @@ class App extends Component {
 
     let elementToPlace = document.getElementById(droppableCardId);
     let length = targetElementId.split(' ').length;
-    if (length != 2) event.target.appendChild(elementToPlace);
+
+    if (length != 3) event.target.appendChild(elementToPlace);
     else event.target.parentNode.parentNode.appendChild(elementToPlace);
   }
 
@@ -142,8 +155,11 @@ class App extends Component {
   getUpperLeftDiv(stockCards) {
     return (
       <div id="upperDivLeft" className="upperDivLeft">
-        <div id="stocks" className="stocks">
+        <div id="stocks" className="stocks" onClick={this.PutOnWaste}>
           {stockCards}
+        </div>
+        <div class="undo" onClick={this.putBackOnStocks}>
+          &#x2940;
         </div>
         <div
           id="waste"
