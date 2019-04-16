@@ -25,9 +25,9 @@ export default class Card extends Component {
     return (
       <div
         className={className}
-        draggable={true}
         onDragStart={this.drag}
         id={id}
+        draggable={true}
       >
         <div className="upperPartOfCard">{rank}</div>
         <div className="symbol">{this.state.symbol}</div>
