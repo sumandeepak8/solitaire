@@ -18,7 +18,9 @@ class App extends Component {
         secondFoundationPile: [],
         thirdFoundationPile: [],
         fourthFoundationPile: []
-      }
+      },
+      wasteCards: [],
+      tableauPiles: []
     };
     this.allowDrop = this.allowDrop.bind(this);
     this.drop = this.drop.bind(this);
@@ -28,11 +30,19 @@ class App extends Component {
     this.dropOnFoundationPiles = this.dropOnFoundationPiles.bind(this);
   }
 
+  updateStocksAndWaste() {
+    this.setState({
+      stocksCards: this.state.stocksCards,
+      wasteCards: this.state.wasteCards
+    });
+  }
+
   putBackOnStocks(event) {
     event.preventDefault();
     let upperCard = document.getElementById('waste').lastChild;
     if (upperCard != null) {
-      document.getElementById('stocks').appendChild(upperCard);
+      this.state.stocksCards.push(this.state.wasteCards.pop());
+      this.updateStocksAndWaste();
     }
   }
 
@@ -40,7 +50,8 @@ class App extends Component {
     event.preventDefault();
     let length = event.target.parentNode.id.split(' ').length;
     if (length == 3) {
-      document.getElementById('waste').appendChild(event.target.parentNode);
+      this.state.wasteCards.push(this.state.stocksCards.pop());
+      this.updateStocksAndWaste();
     }
   }
 
@@ -54,7 +65,7 @@ class App extends Component {
       (cardRank == 'K' && targetRank == 'Q') ||
       (cardRank == 'Q' && targetRank == 'J') ||
       (cardRank == 'J' && targetRank == '10') ||
-      cardRank == targetRank + 1
+      +cardRank == +targetRank + 1
     )
       return true;
     return false;
@@ -66,7 +77,7 @@ class App extends Component {
       (targetRank == 'K' && cardRank == 'Q') ||
       (targetRank == 'Q' && cardRank == 'J') ||
       (targetRank == 'J' && cardRank == '10') ||
-      cardRank == targetRank - 1
+      +cardRank == +targetRank - 1
     )
       return true;
     return false;
@@ -106,7 +117,6 @@ class App extends Component {
     let cardDetails = droppableCardId.split(' ');
     let cardRank = cardDetails[0];
     let cardSuit = cardDetails[2];
-
     let upperCard = event.target.lastChild;
     let targetDetails = [];
     if (upperCard != null) targetDetails = upperCard.id.split(' ');
@@ -117,14 +127,14 @@ class App extends Component {
     return false;
   }
 
-  isWon() {
+  hasWon() {
     let foundationCards = this.state.foundationCards;
-    let isWon = true;
+    let hasWon = true;
     let totalCards = Object.values(foundationCards);
     totalCards.forEach(cards => {
-      if (cards.length != 13) isWon = false;
+      if (cards.length != 13) hasWon = false;
     });
-    if (isWon) alert('you won this game');
+    if (hasWon) alert('you won this game');
   }
 
   dropOnFoundationPiles(event) {
@@ -134,7 +144,7 @@ class App extends Component {
     let card = document.getElementById(droppableCardId);
     this.state.foundationCards[targetId].push(card);
     document.getElementById(targetId).appendChild(card);
-    this.isWon();
+    this.hasWon();
   }
 
   createFoundation() {
@@ -145,10 +155,10 @@ class App extends Component {
         onDragOver={this.allowDrop}
         onDrop={this.dropOnFoundationPiles}
       >
-        <Div className="foundationPiles" id="firstFoundationPile" />
-        <Div className="foundationPiles" id="secondFoundationPile" />
-        <Div className="foundationPiles" id="thirdFoundationPile" />
-        <Div className="foundationPiles" id="fourthFoundationPile" />
+        <div className="foundationPiles" id="firstFoundationPile" />
+        <div className="foundationPiles" id="secondFoundationPile" />
+        <div className="foundationPiles" id="thirdFoundationPile" />
+        <div className="foundationPiles" id="fourthFoundationPile" />
       </div>
     );
   }
@@ -171,6 +181,7 @@ class App extends Component {
     let king = (
       <Card symbol={symbol} color={color} rank="K" className={className} />
     );
+
     let queen = (
       <Card symbol={symbol} color={color} rank="Q" className={className} />
     );
@@ -204,6 +215,19 @@ class App extends Component {
     }
   };
 
+  getWastesDiv() {
+    return (
+      <div
+        id="waste"
+        className="waste"
+        onDrop={this.dropOnWaste}
+        onDragOver={this.allowDrop}
+      >
+        {this.state.wasteCards}
+      </div>
+    );
+  }
+
   getStocksDiv() {
     return (
       <div id="stocks" className="stocks" onClick={this.PutOnWaste}>
@@ -220,18 +244,12 @@ class App extends Component {
     );
   }
 
-  getUpperLeftDiv(stockCards) {
+  getUpperLeftDiv() {
     return (
       <div id="upperDivLeft" className="upperDivLeft">
-        {this.getStocksDiv(stockCards)}
+        {this.getStocksDiv()}
         {this.getUndoDiv()}
-        <div
-          id="waste"
-          className="waste"
-          onDrop={this.dropOnWaste}
-          onDragOver={this.allowDrop}
-        />
-        ;
+        {this.getWastesDiv()}
       </div>
     );
   }
@@ -244,10 +262,10 @@ class App extends Component {
     );
   }
 
-  getUpperDiv(stocks) {
+  getUpperDiv() {
     return (
       <div id="upperDiv" className="upperDiv">
-        {this.getUpperLeftDiv(stocks)}
+        {this.getUpperLeftDiv()}
         {this.getUpperRightDiv()}
       </div>
     );
@@ -265,9 +283,8 @@ class App extends Component {
     );
   }
 
-  getTableauPiles() {
+  createTableauPiles() {
     let deck = this.state.deck;
-    let tableauPiles = new Array();
     for (let i = 1; i <= 7; i++) {
       let cardsForEachPile = new Array();
       for (let j = 1; j <= i; j++) {
@@ -277,27 +294,31 @@ class App extends Component {
         deck.splice(randomIndex, 1);
       }
       let tablePile = this.getTablePile(cardsForEachPile);
-      tableauPiles.push(tablePile);
+      this.state.tableauPiles.push(tablePile);
     }
-    return tableauPiles;
   }
 
-  getBottomDiv(tableauPiles) {
+  getBottomDiv() {
     return (
       <div id="bottomDiv" className="bottomDiv">
         <div id="tableau" className="tableau">
-          {tableauPiles}
+          {this.state.tableauPiles}
         </div>
       </div>
     );
   }
 
   getBoard() {
-    this.createDeck();
-    this.putCardsOnStock();
+    if (
+      this.state.stocksCards.length == 0 ||
+      this.state.tableauPiles.length == 0
+    ) {
+      this.createDeck();
+      this.putCardsOnStock();
+      this.createTableauPiles();
+    }
+    let bottomDiv = this.getBottomDiv();
     let upperDiv = this.getUpperDiv();
-    let tableauPiles = this.getTableauPiles();
-    let bottomDiv = this.getBottomDiv(tableauPiles);
     return { upperDiv, bottomDiv };
   }
 
