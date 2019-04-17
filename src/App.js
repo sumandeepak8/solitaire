@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
 import Card from './Card';
-import Div from './Div';
 
 class App extends Component {
   constructor(props) {
@@ -22,10 +21,12 @@ class App extends Component {
       wasteCards: [],
       tableauPiles: []
     };
+    this.deckJSON = [];
+    this.isCreatedDeck = false;
     this.allowDrop = this.allowDrop.bind(this);
     this.drop = this.drop.bind(this);
-    this.dropOnWaste = this.dropOnWaste.bind(this);
-    this.PutOnWaste = this.PutOnWaste.bind(this);
+    this.generateDeckJSON = this.generateDeckJSON.bind(this);
+    this.putOnWaste = this.putOnWaste.bind(this);
     this.putBackOnStocks = this.putBackOnStocks.bind(this);
     this.dropOnFoundationPiles = this.dropOnFoundationPiles.bind(this);
   }
@@ -46,7 +47,7 @@ class App extends Component {
     }
   }
 
-  PutOnWaste(event) {
+  putOnWaste(event) {
     event.preventDefault();
     let length = event.target.parentNode.id.split(' ').length;
     if (length == 3) {
@@ -96,15 +97,11 @@ class App extends Component {
     if (this.isOfLowRank(cardRank, targetRank)) return isDifferentColors;
   }
 
-  dropOnWaste(event) {
-    event.preventDefault();
-    const droppableCardId = event.dataTransfer.getData('text');
-    event.target.appendChild(document.getElementById(droppableCardId));
-  }
-
   drop(event) {
     event.preventDefault();
     const droppableCardId = event.dataTransfer.getData('text');
+    const dragLocation = event.dataTransfer.getData('draggingLocation');
+
     let targetElementId = event.target.parentNode.id;
     if (!this.isValidToDrop(droppableCardId, targetElementId)) return;
     let elementToPlace = document.getElementById(droppableCardId);
@@ -175,35 +172,40 @@ class App extends Component {
     return { symbol: symbolAndColor.symbol, color: symbolAndColor.color };
   }
 
-  createSuit(className) {
-    let { symbol, color } = this.getSymbolAndColor(className);
-
-    let king = (
-      <Card symbol={symbol} color={color} rank="K" className={className} />
-    );
-
-    let queen = (
-      <Card symbol={symbol} color={color} rank="Q" className={className} />
-    );
-    let jack = (
-      <Card symbol={symbol} color={color} rank="J" className={className} />
-    );
-
-    for (let i = 1; i <= 10; i++)
-      this.state.deck.push(
-        <Card symbol={symbol} color={color} rank={i} className={className} />
+  createDeck() {
+    this.state.deck = this.deckJSON.map(cardJSON => {
+      let { symbol, rank, color, className } = cardJSON;
+      return (
+        <Card symbol={symbol} color={color} rank={rank} className={className} />
       );
-
-    this.state.deck.push(jack);
-    this.state.deck.push(queen);
-    this.state.deck.push(king);
+    });
   }
 
-  createDeck() {
-    this.createSuit('spade');
-    this.createSuit('heart');
-    this.createSuit('club');
-    this.createSuit('diamond');
+  getCard(rank, cardDetails) {
+    let card = Object.assign({}, cardDetails);
+    card.rank = rank;
+    return card;
+  }
+
+  generateSuitJSON(className) {
+    let { symbol, color } = this.getSymbolAndColor(className);
+    let card = {
+      symbol: symbol,
+      color: color,
+      rank: undefined,
+      className: className
+    };
+    for (let i = 1; i <= 10; i++) this.deckJSON.push(this.getCard(i, card));
+    this.deckJSON.push(this.getCard('K', card));
+    this.deckJSON.push(this.getCard('Q', card));
+    this.deckJSON.push(this.getCard('J', card));
+  }
+
+  generateDeckJSON() {
+    this.generateSuitJSON('spade');
+    this.generateSuitJSON('club');
+    this.generateSuitJSON('diamond');
+    this.generateSuitJSON('heart');
   }
 
   putCardsOnStock = function() {
@@ -217,12 +219,7 @@ class App extends Component {
 
   getWastesDiv() {
     return (
-      <div
-        id="waste"
-        className="waste"
-        onDrop={this.dropOnWaste}
-        onDragOver={this.allowDrop}
-      >
+      <div id="waste" className="waste">
         {this.state.wasteCards}
       </div>
     );
@@ -230,7 +227,7 @@ class App extends Component {
 
   getStocksDiv() {
     return (
-      <div id="stocks" className="stocks" onClick={this.PutOnWaste}>
+      <div id="stocks" className="stocks" onClick={this.putOnWaste}>
         {this.state.stocksCards}
       </div>
     );
@@ -309,13 +306,13 @@ class App extends Component {
   }
 
   getBoard() {
-    if (
-      this.state.stocksCards.length == 0 ||
-      this.state.tableauPiles.length == 0
-    ) {
+    if (!this.isCreatedDeck) {
+      this.isCreatedDeck = true;
+      this.generateDeckJSON();
       this.createDeck();
       this.putCardsOnStock();
       this.createTableauPiles();
+      this.deckJSON = [];
     }
     let bottomDiv = this.getBottomDiv();
     let upperDiv = this.getUpperDiv();
