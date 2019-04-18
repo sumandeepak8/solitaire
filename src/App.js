@@ -172,15 +172,6 @@ class App extends Component {
     return { symbol: symbolAndColor.symbol, color: symbolAndColor.color };
   }
 
-  createDeck() {
-    this.state.deck = this.deckJSON.map(cardJSON => {
-      let { symbol, rank, color, className } = cardJSON;
-      return (
-        <Card symbol={symbol} color={color} rank={rank} className={className} />
-      );
-    });
-  }
-
   getCard(rank, cardDetails) {
     let card = Object.assign({}, cardDetails);
     card.rank = rank;
@@ -208,12 +199,26 @@ class App extends Component {
     this.generateSuitJSON('heart');
   }
 
+  getCardComponent(on) {
+    let deck = this.deckJSON;
+    let index = Math.floor(Math.random() * deck.length);
+    let card = (
+      <Card
+        rank={deck[index].rank}
+        color={deck[index].color}
+        className={deck[index].className}
+        on={on}
+        symbol={deck[index].symbol}
+      />
+    );
+    deck.splice(index, 1);
+    return card;
+  }
+
   putCardsOnStock = function() {
-    let deck = this.state.deck;
     for (let i = 1; i <= 24; i++) {
-      let index = [Math.floor(Math.random() * deck.length)];
-      this.state.stocksCards.push(deck[index]);
-      deck.splice(index, 1);
+      let card = this.getCardComponent('stocksCard');
+      this.state.stocksCards.push(card);
     }
   };
 
@@ -281,14 +286,11 @@ class App extends Component {
   }
 
   createTableauPiles() {
-    let deck = this.state.deck;
     for (let i = 1; i <= 7; i++) {
       let cardsForEachPile = new Array();
       for (let j = 1; j <= i; j++) {
-        let randomIndex = Math.floor(Math.random() * deck.length);
-        let cardToAdd = deck[randomIndex];
-        cardsForEachPile.push(cardToAdd);
-        deck.splice(randomIndex, 1);
+        let card = this.getCardComponent(`tableuPilesCard ${i}`);
+        cardsForEachPile.push(card);
       }
       let tablePile = this.getTablePile(cardsForEachPile);
       this.state.tableauPiles.push(tablePile);
@@ -309,7 +311,6 @@ class App extends Component {
     if (!this.isCreatedDeck) {
       this.isCreatedDeck = true;
       this.generateDeckJSON();
-      this.createDeck();
       this.putCardsOnStock();
       this.createTableauPiles();
       this.deckJSON = [];

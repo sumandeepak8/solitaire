@@ -8,6 +8,7 @@ export default class Card extends Component {
       symbol: props.symbol,
       className: props.className,
       color: props.color,
+      at: props.at,
       onDragStart: props.drag
     };
     this.drag = this.drag.bind(this);
