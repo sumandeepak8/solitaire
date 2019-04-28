@@ -82,6 +82,7 @@ body {
   border-radius: 8px;
   position: relative;
   margin-top: -80px;
+  user-select: none;
 }
 
 .stocks,
