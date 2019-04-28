@@ -246,10 +246,10 @@ class App extends Component {
     );
   }
 
-  getCardsComponent(cards) {
+  getCardsComponent(cards, areAllCardsFlipped) {
     return cards.map((card, i) => {
       let isDraggable = false;
-      if (i == cards.length - 1) isDraggable = true;
+      if (i == cards.length - 1 && !areAllCardsFlipped) isDraggable = true;
       return this.getCardDom(card, isDraggable);
     });
   }
@@ -257,7 +257,7 @@ class App extends Component {
   getWastesDiv() {
     return (
       <div id="waste" className="waste">
-        {this.getCardsComponent(this.state.wasteCards)}
+        {this.getCardsComponent(this.state.wasteCards, false)}
       </div>
     );
   }
@@ -265,7 +265,7 @@ class App extends Component {
   getStocksDiv() {
     return (
       <div id="stocks" className="stocks" onClick={this.putOnWaste}>
-        {this.getCardsComponent(this.state.stocksCards)}
+        {this.getCardsComponent(this.state.stocksCards, true)}
       </div>
     );
   }
@@ -322,7 +322,7 @@ class App extends Component {
         onDrop={this.drop}
         onDragOver={this.allowDrop}
       >
-        {this.getCardsComponent(cardsForEachPile)}
+        {this.getCardsComponent(cardsForEachPile, false)}
       </div>
     );
   }
