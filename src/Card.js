@@ -9,7 +9,7 @@ export default class Card extends Component {
       className: props.className,
       color: props.color,
       isDraggable: props.isDraggable,
-      isFlipped: props.isFlipped
+      isFaceUp: props.isFaceUp
     };
     this.drag = this.drag.bind(this);
   }
@@ -23,13 +23,13 @@ export default class Card extends Component {
     let rank = this.state.rank;
     let color = this.state.color;
     let isDraggable = this.state.isDraggable;
-    let isFlipped = this.state.isFlipped;
+    let isFaceUp = this.state.isFaceUp;
     let id = `${rank} ${color} ${className}`;
-    let background = "";
-    if (!isFlipped) {
+    if (!isFaceUp) {
       rank = "";
       this.state.symbol = "";
     }
+    // console.log("card dom ", this.state);
     return (
       <div
         className={className}
@@ -37,7 +37,6 @@ export default class Card extends Component {
         id={id}
         draggable={isDraggable}
       >
-        {background}
         <div className="upperPartOfCard">{rank}</div>
         <div className="symbol">{this.state.symbol}</div>
         <div className="lowerPartOfCard">{rank}</div>

@@ -43,7 +43,6 @@ class App extends Component {
     let upperCard = document.getElementById("waste").lastChild;
     if (upperCard != null) {
       this.state.stocksCards.push(this.state.wasteCards.pop());
-      console.log("stocks card", this.state.stocksCards);
       this.updateStocksAndWaste();
     }
   }
@@ -61,25 +60,13 @@ class App extends Component {
     event.preventDefault();
   }
 
-  isOfHighRank(cardRank, targetRank) {
+  compareRank(firstRank, secondRank, diff) {
     if (
-      (cardRank == "tableau" && targetRank == "K") ||
-      (cardRank == "K" && targetRank == "Q") ||
-      (cardRank == "Q" && targetRank == "J") ||
-      (cardRank == "J" && targetRank == "10") ||
-      +cardRank == +targetRank + 1
-    )
-      return true;
-    return false;
-  }
-
-  isOfLowRank(cardRank, targetRank) {
-    if (
-      (targetRank == "tableau" && cardRank == "K") ||
-      (targetRank == "K" && cardRank == "Q") ||
-      (targetRank == "Q" && cardRank == "J") ||
-      (targetRank == "J" && cardRank == "10") ||
-      +cardRank == +targetRank - 1
+      (firstRank == "tableau" && secondRank == "K") ||
+      (firstRank == "K" && secondRank == "Q") ||
+      (firstRank == "Q" && secondRank == "J") ||
+      (firstRank == "J" && secondRank == "10") ||
+      +firstRank == +secondRank + diff
     )
       return true;
     return false;
@@ -95,39 +82,58 @@ class App extends Component {
     let targetColor = targetDetails[1];
 
     let isDifferentColors = cardColor != targetColor;
-    if (this.isOfLowRank(cardRank, targetRank)) return isDifferentColors;
+    if (this.compareRank(targetRank, cardRank, 1)) return isDifferentColors;
+    return false;
   }
 
-  searchCardLocationAndRemove() {}
+  searchCardLocation(rank, className) {
+    let location;
+    this.state.wasteCards.forEach(card => {
+      if (card.rank == rank && card.className == className)
+        // this part can be taken into callback function
+        location = this.state.wasteCards;
+    });
+    this.state.tableauPiles.forEach(pile => {
+      pile.forEach(card => {
+        if (card.rank == rank && card.className == className) location = pile;
+      });
+    });
+    return location;
+  }
 
   drop(event) {
     event.preventDefault();
     const droppableCardId = event.dataTransfer.getData("text");
     let targetElementId = event.target.parentNode.id;
+
     if (!this.isValidToDrop(droppableCardId, targetElementId)) return;
     let elementToPlace = document.getElementById(droppableCardId);
     let idData = targetElementId.split(" ");
-
     let length = idData.length;
-    console.log(
-      event.target.parentNode,
-      "target element id in drop is ",
-      targetElementId,
-      " length is ",
-      length
-    );
     if (length == 3) {
-      console.log(targetElementId, " parent node is ");
-      let card = this.state.stocksCards.pop();
-      // this.state.tableauPiles[tableIndex].props.children.push(card);
+      let cardDetail = droppableCardId.split(" ");
+      let initialLocation = this.searchCardLocation(
+        cardDetail[0],
+        cardDetail[2]
+      );
+
+      // console.log(
+      //   "initial location is ",
+      //   initialLocation,
+      //   " length is ",
+      //   initialLocation.length
+      // );
+
+      let finalLocation = this.searchCardLocation(idData[0], idData[2]);
+      finalLocation.push(initialLocation.pop());
+      this.setState({
+        stocksCards: this.state.stocksCards,
+        tableauPiles: this.state.tableauPiles
+      });
     }
     if (event.target.id == "tableau") {
       event.target.appendChild(elementToPlace);
     }
-    this.setState({
-      stocksCards: this.state.stocksCards,
-      tableauPiles: this.state.tableauPiles
-    });
   }
 
   isValidToDropOnFoundationPile(event, droppableCardId) {
@@ -140,7 +146,8 @@ class App extends Component {
     let targetRank = targetDetails[0];
     let targetSuit = targetDetails[2];
     if (upperCard == null && cardRank == 1) return true;
-    if (this.isOfHighRank(cardRank, targetRank)) return cardSuit == targetSuit;
+    if (this.compareRank(cardRank, targetRank, 1))
+      return cardSuit == targetSuit;
     return false;
   }
 
@@ -161,6 +168,9 @@ class App extends Component {
     let card = document.getElementById(droppableCardId);
     this.state.foundationCards[targetId].push(card);
     document.getElementById(targetId).appendChild(card);
+    this.setState({
+      foundationCards: this.state.foundationCards
+    });
     this.hasWon();
   }
 
@@ -237,7 +247,7 @@ class App extends Component {
     return (
       <Card
         isDraggable={isDraggable}
-        isFlipped={isDraggable}
+        isFaceUp={isDraggable}
         rank={cardDetail.rank}
         color={cardDetail.color}
         className={cardDetail.className}
@@ -316,13 +326,14 @@ class App extends Component {
   }
 
   getTablePile(cardsForEachPile) {
+    let allCards = this.getCardsComponent(cardsForEachPile, false);
     return (
       <div
         className="tableauPiles"
         onDrop={this.drop}
         onDragOver={this.allowDrop}
       >
-        {this.getCardsComponent(cardsForEachPile, false)}
+        {allCards}
       </div>
     );
   }
