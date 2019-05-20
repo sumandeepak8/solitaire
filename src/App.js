@@ -105,9 +105,7 @@ class App extends Component {
     event.preventDefault();
     const droppableCardId = event.dataTransfer.getData("text");
     let targetElementId = event.target.parentNode.id;
-
     if (!this.isValidToDrop(droppableCardId, targetElementId)) return;
-    let elementToPlace = document.getElementById(droppableCardId);
     let idData = targetElementId.split(" ");
     let length = idData.length;
     if (length == 3) {
@@ -116,23 +114,12 @@ class App extends Component {
         cardDetail[0],
         cardDetail[2]
       );
-
-      // console.log(
-      //   "initial location is ",
-      //   initialLocation,
-      //   " length is ",
-      //   initialLocation.length
-      // );
-
       let finalLocation = this.searchCardLocation(idData[0], idData[2]);
       finalLocation.push(initialLocation.pop());
+
       this.setState({
-        stocksCards: this.state.stocksCards,
         tableauPiles: this.state.tableauPiles
       });
-    }
-    if (event.target.id == "tableau") {
-      event.target.appendChild(elementToPlace);
     }
   }
 
