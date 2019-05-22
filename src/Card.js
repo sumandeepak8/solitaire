@@ -3,13 +3,6 @@ import React, { Component } from "react";
 export default class Card extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      rank: props.rank,
-      symbol: props.symbol,
-      className: props.className,
-      color: props.color,
-      isDraggable: props.isDraggable
-    };
     this.drag = this.drag.bind(this);
   }
 
@@ -18,14 +11,15 @@ export default class Card extends Component {
   }
 
   render() {
-    let className = this.state.className;
-    let rank = this.state.rank;
-    let color = this.state.color;
-    let isDraggable = this.state.isDraggable;
+    let className = this.props.className;
+    let rank = this.props.rank;
+    let color = this.props.color;
+    let isDraggable = this.props.isDraggable;
+    let symbol = this.props.symbol;
     let id = `${rank} ${color} ${className}`;
     if (!isDraggable) {
       rank = "";
-      this.state.symbol = "";
+      symbol = "";
     }
     return (
       <div
@@ -35,7 +29,7 @@ export default class Card extends Component {
         draggable={isDraggable}
       >
         <div className="upperPartOfCard">{rank}</div>
-        <div className="symbol">{this.state.symbol}</div>
+        <div className="symbol">{symbol}</div>
         <div className="lowerPartOfCard">{rank}</div>
       </div>
     );
